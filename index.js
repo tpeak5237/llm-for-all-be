@@ -4,34 +4,31 @@ import fetch from "node-fetch";
 
 const app = express();
 app.use(express.json());
-app.use(cors());
 
-// LOGIN
-app.post("/login", (req, res) => {
-  try {
-    const { user, pass } = req.body;
-    const accounts = JSON.parse(process.env.ACCOUNTS || "{}");
-    if (!accounts[user] || accounts[user] !== pass) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
-    res.status(200).json({ ok: true, user });
-  } catch (err) {
-    res.status(400).json({ error: "Bad request", detail: err.message });
-  }
+// Fix CORS issue
+app.use(
+  cors({
+    origin: "*", // allow all origins
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type"],
+  })
+);
+
+// Health check
+app.get("/", (req, res) => {
+  res.status(200).send("✅ LLM-for-All backend running on Render");
 });
 
-// CALL-AI
+// AI endpoint
 app.post("/call-ai", async (req, res) => {
   try {
-    const body = req.body;
-    const model = body.model || "gemma-3-27b-it";
-    const payload = body.payload || body;
+    const { model, payload } = req.body;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=AIzaSyAi7g9ktQXUYoj0F9j_cgTpQQhIM1CVcHQ`;
 
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.API_KEY}`;
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
 
     const text = await response.text();
@@ -39,11 +36,6 @@ app.post("/call-ai", async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: "AI request failed", detail: err.message });
   }
-});
-
-// Health check
-app.get("/", (req, res) => {
-  res.status(200).send("✅ LLM-for-All backend running on Render");
 });
 
 const PORT = process.env.PORT || 8080;
