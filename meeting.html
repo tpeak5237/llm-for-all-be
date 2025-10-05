@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Meeting Report for all</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Taviraj:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --brown: #8B5E3C; --gold: #D4AF37 }
+    body { font-family: 'Taviraj', system-ui, -apple-system, Segoe UI, Roboto, 'Noto Sans Thai', sans-serif; background: linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%) }
+    .card { box-shadow: 0 10px 25px rgba(0,0,0,.08) }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace }
+    .btn-brown { background: var(--brown); color: #fff }
+    .btn-ghost { border: 1px solid var(--brown); color: var(--brown) }
+    .outline-brown:focus { outline-color: var(--brown) }
+    .nav-card { background:#f5f5f7; color:#1d1d1f; padding:0.85rem 1.25rem; text-decoration:none; font-size:1.125rem; font-weight:500; border-radius:20px; transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease, color .2s ease; box-shadow:0 10px 20px rgba(0,0,0,0.05); display:flex; align-items:center; justify-content:center; text-align:center; border:1px solid rgba(139,94,60,0.2); }
+    @media (min-width: 768px) { .nav-card { padding:1.1rem 1.75rem } }
+    .nav-card:hover { transform: translateY(-6px) scale(1.01); box-shadow: 0 15px 30px rgba(0,0,0,0.12); background-color: var(--brown); color:#fff; border-color: var(--brown); }
+  </style>
+</head>
+<body class="min-h-screen text-slate-900">
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <header class="mb-6 text-center">
+      <h1 class="text-3xl font-bold tracking-tight" style="color: var(--brown)">Meeting Report for all</h1>
+      <p class="text-slate-600">วางโน้ตการประชุม แล้วแปลงเป็นรายงานสั้น อ่านง่าย พร้อมคัดลอก</p>
+    </header>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      <!-- Controls -->
+      <section class="card bg-white rounded-2xl p-5 border border-slate-200">
+        <h2 class="text-lg font-semibold mb-3" style="color: var(--brown)">ตั้งค่า</h2>
+        <div class="space-y-4">
+          <label class="block text-sm">ภาษาเอาต์พุต
+            <select id="lang" class="mt-1 w-full rounded-xl border-slate-300 focus:border-[var(--brown)] focus:ring-[var(--brown)]">
+              <option value="th">ไทย</option>
+              <option value="en">English</option>
+            </select>
+          </label>
+
+          <div>
+            <p class="text-sm mb-2">หัวข้อที่ต้องมี</p>
+            <div class="grid grid-cols-2 gap-2 text-sm">
+              <label class="inline-flex items-center gap-2"><input type="checkbox" class="section" value="ข้อมูลประชุม" checked>ข้อมูลประชุม</label>
+              <label class="inline-flex items-center gap-2"><input type="checkbox" class="section" value="ผู้เข้าร่วม" checked>ผู้เข้าร่วม</label>
+              <label class="inline-flex items-center gap-2"><input type="checkbox" class="section" value="ระเบียบวาระ" checked>ระเบียบวาระ</label>
+              <label class="inline-flex items-center gap-2"><input type="checkbox" class="section" value="สรุปการอภิปราย" checked>สรุปการอภิปราย</label>
+              <label class="inline-flex items-center gap-2"><input type="checkbox" class="section" value="การตัดสินใจ" checked>การตัดสินใจ</label>
+              <label class="inline-flex items-center gap-2"><input type="checkbox" class="section" value="งานมอบหมาย" checked>งานมอบหมาย</label>
+              <label class="inline-flex items-center gap-2"><input type="checkbox" class="section" value="ประเด็นเสี่ยง">ประเด็นเสี่ยง</label>
+              <label class="inline-flex items-center gap-2"><input type="checkbox" class="section" value="ขั้นตอนถัดไป">ขั้นตอนถัดไป</label>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <label class="block text-sm">รูปแบบผลลัพธ์
+              <select id="format" class="mt-1 w-full rounded-xl border-slate-300 focus:border-[var(--brown)] focus:ring-[var(--brown)]">
+                <option value="text">Text</option>
+                <option value="markdown">Markdown</option>
+              </select>
+            </label>
+            <label class="block text-sm">สไตล์
+              <select id="style" class="mt-1 w-full rounded-xl border-slate-300 focus:border-[var(--brown)] focus:ring-[var(--brown)]">
+                <option value="short">สั้น ชัด</option>
+                <option value="normal">มาตรฐาน</option>
+                <option value="long">ยาว</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <button id="gen" class="px-3 py-2 rounded-xl text-white font-semibold btn-brown">สร้างรายงาน</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Notes input -->
+      <section class="card bg-white rounded-2xl p-5 border border-slate-200">
+        <h2 class="text-lg font-semibold mb-3" style="color: var(--brown)">วางโน้ตการประชุม</h2>
+        <textarea id="notes" rows="18" class="w-full rounded-xl border-slate-300 focus:border-[var(--brown)] focus:ring-[var(--brown)] mono p-3" placeholder="วางทุกอย่างที่เกิดขึ้น เช่น วันเวลา สถานที่ ผู้เข้าร่วม หัวข้อ คอมเมนต์ การตัดสินใจ งานมอบหมาย"></textarea>
+        <div id="moderationStatus" class="mt-2 p-2 rounded text-sm hidden"></div>
+      </section>
+    </div>
+
+    <!-- Output -->
+    <section class="mt-6 card bg-white rounded-2xl p-5 border border-slate-200">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-semibold" style="color: var(--brown)">ผลลัพธ์</h2>
+        <div class="flex gap-2">
+          <button id="copyBtn" class="px-3 py-2 rounded-xl btn-ghost">คัดลอก</button>
+          <button id="downloadBtn" class="px-3 py-2 rounded-xl btn-ghost">ดาวน์โหลด .txt</button>
+        </div>
+      </div>
+      <textarea id="output" rows="18" class="w-full rounded-xl border-slate-300 focus:border-[var(--brown)] focus:ring-[var(--brown)] mono p-3" placeholder="รายงานจะปรากฏที่นี่"></textarea>
+    </section>
+
+    <!-- Directory Section -->
+    <main>
+      <center>
+        <h2 class="text-3xl font-bold" style="color: var(--brown);font-family:'Playfair Display',serif;letter-spacing:-0.01em;margin-bottom:1.5rem;">Directory</h2>
+        <a href="index.html" class="nav-card">LLM for all</a>
+      </center>
+    </main>
+
+    <footer class="mt-8 text-center text-sm text-slate-500">
+      <h2 class="font-bold text-lg" style="color: var(--brown)">ปัญญาประดิษฐ์เพื่อการเป็นมิตรต่อสิ่งแวดล้อมและอยู่ในจริยธรรมทางปัญญาประดิษฐ์ที่ถูกต้อง</h2>
+      <p class="mt-2">ระดับชั้น ม.3/5</p>
+      <div class="mt-4 text-left inline-block">
+        <ol class="list-decimal list-inside">
+          <li>เด็กชาย นิธิศ โพธิ์ลีลาธรรม เลขที่ 6</li>
+          <li>เด็กชาย ติณณ์ศดิศ บัณฑิตเอกตระกูล เลขที่ 13</li>
+          <li>เด็กชาย ธีรภัทรส์ พงษ์เกษม เลขที่ 14</li>
+          <li>เด็กชาย พัสกร บุญบูรพงศ์ เลขที่ 17</li>
+          <li>เด็กชาย แทนคุณ เซี่ยงฉิน เลขที่ 21</li>
+          <li>เด็กชาย ธนกฤต บุญรักษาตระกูล เลขที่ 26</li>
+          <li>เด็กชาย กรวิชญ์ เพียรผลดีตะกูล เลขที่ 27</li>
+          <li>เด็กชาย ศุภรุจ ศรีหะรัญ เลขที่ 39</li>
+        </ol>
+      </div>
+      <h2 class="mt-6 font-bold text-lg" style="color: var(--brown)">โครงงาน AC Innovation ม.3</h2>
+      <p class="font-semibold" style="color: var(--brown)">Since 29 May 2025</p>
+    </footer>
+  </div>
+
+<script>
+const $ = id => document.getElementById(id)
+const sectionsEl = () => Array.from(document.querySelectorAll('input.section:checked')).map(x => x.value)
+
+// === Environmental constants and functions (from step-by-step.html) ===
+const BASE_PROMPT_WATER_ML = 0.045; // Gemma 27B ~0.045 mL water per 1000 chars
+const BASE_PROMPT_CHARS = 1000;
+function estimateWaterForPrompt(text) {
+  const chars = (text || '').length;
+  const ml = (chars / BASE_PROMPT_CHARS) * BASE_PROMPT_WATER_ML;
+  return Math.max(0.0005, ml); // avoid 0; show a tiny nonzero estimate
+}
+const BASE_PROMPT_ENERGY_WH = 0.045; // Gemma 27B ~0.045 Wh electricity per 1000 chars
+const BASELINE_COMPARISON_WH = 18.35;
+function estimateEnergyForPrompt(text) {
+  const chars = (text || '').length;
+  const wh = (chars / BASE_PROMPT_CHARS) * BASE_PROMPT_ENERGY_WH;
+  return Math.max(0.0001, wh); // avoid zero
+}
+function computePercentSaved(energyWh, baselineWh) {
+  if (typeof energyWh !== 'number' || typeof baselineWh !== 'number' || baselineWh <= 0) return null;
+  let pct = (1 - (energyWh / baselineWh)) * 100;
+  if (pct > 98) pct = 98;
+  if (pct < -100) pct = -100;
+  return pct;
+}
+function updateEnvironmentStats() {
+  const notes = $('notes').value;
+  const waterMl = estimateWaterForPrompt(notes);
+  const energyWh = estimateEnergyForPrompt(notes);
+  const savedPercent = computePercentSaved(energyWh, BASELINE_COMPARISON_WH);
+  // Only update if moderationStatus is visible and green
+  const ms = $('moderationStatus');
+  if (ms && !ms.classList.contains('hidden') && ms.classList.contains('bg-green-100')) {
+    // Only update stats part, not the main message
+    let msg = ms.textContent.split('\n')[0];
+    const lines = [];
+    const displayVal = waterMl < 0.001 ? '<0.001' : waterMl.toFixed(3);
+    lines.push('Estimated water use: ' + displayVal + ' ml');
+    const displayEnergy = energyWh < 0.001 ? '<0.001' : energyWh.toFixed(3);
+    lines.push('Estimated energy use: ' + displayEnergy + ' Wh');
+    const charCount = (notes || '').length;
+    const pageCount = Math.ceil(charCount / 2500);
+    const co2Kg = pageCount * 0.0045;
+    if (co2Kg > 0) {
+      lines.push(`CO2 Saved: ~${co2Kg.toFixed(4)} kg`);
+    }
+    ms.textContent = msg + '\n' + lines.join('\n');
+  }
+}
+
+const moderationStatus = document.getElementById('moderationStatus');
+
+function showModeration(message, ok, waterMl, energyWh, savedPercent) {
+  moderationStatus.style.whiteSpace = 'pre-line';
+  moderationStatus.textContent = message;
+  if (ok) {
+    const lines = [];
+    if (typeof waterMl === 'number') {
+      const displayVal = waterMl < 0.001 ? '<0.001' : waterMl.toFixed(3);
+      lines.push('Estimated water use: ' + displayVal + ' ml');
+    }
+    if (typeof energyWh === 'number') {
+      const displayEnergy = energyWh < 0.001 ? '<0.001' : energyWh.toFixed(3);
+      lines.push('Estimated energy use: ' + displayEnergy + ' Wh');
+    }
+    const charCount = ($('notes').value || '').length;
+    const pageCount = Math.ceil(charCount / 2500);
+    const co2Kg = pageCount * 0.0045;
+    if (co2Kg > 0) {
+      lines.push(`CO2 Saved: ~${co2Kg.toFixed(4)} kg`);
+    }
+    if (lines.length) moderationStatus.textContent += '\n' + lines.join('\n');
+  }
+  moderationStatus.classList.remove('hidden');
+  moderationStatus.className = 'mt-2 p-2 rounded text-sm ' + (ok ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-red-100 text-red-800 border border-red-300');
+  // auto hide after 5s for pass case only
+  if (ok) setTimeout(() => moderationStatus.classList.add('hidden'), 5000);
+}
+
+// ใช้ปลายทาง Cloudflare Worker เสมอ เพื่อป้องกัน file:///api/ai
+const ENDPOINT = window.CF_AI_ENDPOINT || window.LLM_ENDPOINT || 'https://llmforall.theerapatp9.workers.dev/call-ai'
+
+function sanitize(text) {
+  // ลบอักขระขีดยาวทุกชนิด แล้วจัดระเบียบบรรทัด
+  return text
+    .replace(/[\u2012-\u2015\u2212]/g, '-')
+    .replace(/[\t ]+/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+    .replace(/\*/g, '')
+    .replace(/#/g, '');
+}
+
+function buildPrompt(lang, sections, style, notes) {
+  if (lang === 'th') {
+    return `รายงานการประชุม……………………………………………………..
+ครั้งที่............./.....................
+เมื่อวันที่...............................................
+ณ ห้องประชุม..........................................อาคาร..........................ส่วนราชการที่ใช้ประชุม............
+และการประชุมผ่านระบบออนไลน์ (เฉพาะกรณีที่มีการประชุมผ่านระบบออนไลน์ด้วย)
+----------------------------------------
+ผู้มาประชุม
+๑.	............................................................................		ตำแหน่ง..................................................
+๒.	............................................................................		ตำแหน่ง..................................................
+๓.	............................................................................		ตำแหน่ง..................................................
+(แทน..................................................................)
+๔.	............................................................................		ตำแหน่ง..................................................
+๕.	............................................................................		ตำแหน่ง..................................................
+๖.	............................................................................		ตำแหน่ง..................................................
+๗.	............................................................................		ตำแหน่ง..................................................
+
+ผู้ไม่มาประชุม
+๑.	............................................................................		ตำแหน่ง............................... ติดราชการ
+๒.	............................................................................		ตำแหน่ง............................... ลาประชุม
+
+ผู้เข้าร่วมประชุม (ถ้ามี)
+๑.	............................................................................		ตำแหน่ง..................................................
+๒.	............................................................................		ตำแหน่ง..................................................
+๓.	............................................................................		ตำแหน่ง..................................................
+
+เริ่มประชุมเวลา....................น.
+	กรณีที่ 1 การประชุมตามปกติ ไม่มีการประชุมผ่านระบบออนไลน์
+	เมื่อกรรมการครบองค์ประประชุมแล้ว ประธานกล่าวเปิดการประชุม และดำเนินการตามระเบียบวาระการประชุมดังนี้
+
+
+
+
+	กรณีที่ 2 การประชุมที่มีการประชุมผ่านระบบออนไลน์
+	เมื่อกรรมการครบองค์ประชุมแล้ว ประธานกล่าวเปิดการประชุมและขอให้กรรมการที่เข้าประชุมผ่านระบบออนไลน์กล่าวแสดงตน ดังนี้
+	๑.	....................................................................
+	๒.	.....................................................................
+
+ระเบียบวาระที่ ๑	เรื่องที่ประธานแจ้งให้ที่ประชุมทราบ
+
+	กรณที่ 1 หากประธานไม่มีเรื่องแจ้งให้ทราบ ให้ระบุว่า "ไม่มี"
+
+กรณีที่ 2 ประธานมีเรื่องแจ้งให้ทราบ
+	(รายละเอียดเรื่องที่ประธานแจ้งให้ทราบ)...............................................................................................
+.............................................................................................................................................................................
+
+	ที่ประชุมรับทราบ
+
+	กรณีที่ 3 ประธานมอบให้กรรมการในที่ประชุมแจ้งเรื่องให้ทราบ (ถ้ามี)
+	ประธานมอบให้ (ชื่อ-สกุล)......................................ตำแหน่ง...................................แจ้งเรื่อง............................................................................ให้ที่ประชุมทราบดังนี้
+	๑..............................................................................................................................................................
+	๒..............................................................................................................................................................
+	
+	ที่ประชุมรับทราบ
+
+ระเบียบวาระที่ ๒	เรื่องรับรองรายงานการประชุม 
+	ประธาน/เลขานุการขอให้ที่ประชุมพิจารณารายงานการประชุม......................................ครั้งที่...../.......เมื่อวันที่..............................จำนวน.............หน้า เพื่อรับรองรายงานการประชุม
+
+	กรณีที่ 1 ไม่มีการแก้ไขรายงานการประชุม
+	มติ		ที่ประชุมรับรองรายงานการประชุม.............................ครั้งที่....../....... เมื่อวันที่.......................โดยไม่มีการแก้ไข
+
+
+
+
+	กรณีที่ 2 มีการแก้ไขรายงานการประชุม
+	มติ		ที่ประชุมรับรองรายงานการประชุม.............................ครั้งที่....../....... เมื่อวันที่.......................โดยมีการแก้ไขดังนี้
+ 			๑. หน้า.........ระเบียบวาระที่..........ย่อหน้าที่.......บรรทัดที่.......แก้ไขข้อความจาก....................เป็น..............................
+			๒. หน้า.........ระเบียบวาระที่..........ย่อหน้าที่.......บรรทัดที่.......แก้ไขข้อความจาก....................เป็น..............................
+
+ระเบียบวาระที่ ๓	เรื่องสืบเนื่อง
+	๓.๑		(เรื่อง).....................................................................................................
+			กรณีที่ 1 ไม่มีระเบียบวาระประจำ
+		    (ชื่อ-สกุล)................................................ตำแหน่ง........................................สืบเนื่องระเบียบวาระที่..........เรื่อง......................................... โดยขอรายงานการดำเนินงานให้ที่ประชุมทราบดังนี้......................
+..............................................................................................................................................................................
+			
+	มติ		ที่ประชุมรับทราบ และมีข้อเสนอแนะ (ถ้ามี) ดังนี้
+๑.	............................................................................................................................................
+๒.	............................................................................................................................................
+(สรุปความเห็นของที่ประชุมโดยรวม ไม่ต้องระบุชื่อบุคคลที่ให้ข้อคิดเห็นหรือข้อแนะนำ)
+
+			กรณีที่ 2 กรณีบรรจุเรื่องสืบเนื่องเป็นวาระประจำ
+		    (ชื่อ-สกุล)................................................ตำแหน่ง....................................................รายงานการดำเนินงานตามมติที่ประชุม............................ครั้งที่......./........ เมื่อวันที่......................ให้ที่ประชุมทราบดังนี้
+เรื่องที่	ครั้งที่	มติที่ประชุม	การดำเนินงาน	ผู้รับผิดชอบ
+
+
+				
+		
+	มติ		ที่ประชุมรับทราบ และมีข้อเสนอแนะ (ถ้ามี) ดังนี้
+๓.	............................................................................................................................................
+๔.	............................................................................................................................................
+(สรุปความเห็นของที่ประชุมโดยรวม ไม่ต้องระบุชื่อบุคคลที่ให้ข้อคิดเห็นหรือข้อเสนอแนะ
+และหากมีข้อคิดเห็น/ข้อเสนอแนะหลากหลายเรื่อง ให้แยกประเด็นออกเป็นกลุ่มให้ชัดเจน)
+
+ระเบียบวาระที่ ๔		เรื่องเสนอเพื่อทราบ
+	๔.๑	(เรื่อง).....................................................................................................
+		    (ชื่อ-สกุล)................................................ตำแหน่ง....................................................รายงาน/แจ้งเรื่อง..........................................................ให้ที่ประชุมทราบดังนี้....................................................................
+
+	มติ	ที่ประชุมรับทราบ และมีข้อเสนอแนะ (ถ้ามี) ดังนี้
+๑.	............................................................................................................................................
+๒.	............................................................................................................................................
+(สรุปความเห็นของที่ประชุมโดยรวม ไม่ต้องระบุชื่อบุคคลที่ให้ข้อคิดเห็นหรือข้อเสนอแนะ
+และหากมีข้อคิดเห็น/ข้อเสนอแนะหลากหลายเรื่อง ให้แยกประเด็นออกเป็นกลุ่มให้ชัดเจน)
+
+ระเบียบวาระที่ ๕		เรื่องเสนอเพื่อพิจารณา
+		๕.๑		(เรื่อง).....................................................................................................
+		    (ชื่อ-สกุล)................................................ตำแหน่ง...............................................เสนอที่ประชุมพิจารณา (เรื่อง)........................................................ดังนี้......................................................................................
+
+			(กรณีผู้นำเสนอมิใช่คณะกรรมการฯ ให้ใช้ข้อความดังนี้)
+			ประธาน/เลขานุการ ขออนุญาตให้ (ชื่อ –  สกุล).......................................................................
+ตำแหน่ง....................................................เสนอที่ประชุมพิจารณา (เรื่อง).....................................................ดังนี้......................................................................................
+
+			(กรณีมีกรรมการให้ข้อมูลประกอบการพิจารณาเพิ่มเติม ให้ใช้ข้อความดังนี้)
+			(ชื่อ-สกุล)...............................................ตำแหน่ง....................................................ให้ข้อมูลเพิ่มเติมดังนี้...........................................................................................................................................................
+
+		มติ		ที่ประชุม เห็นชอบ / อนุมัติ / ไม่เห็นชอบ / ไม่อนุมัติ / ให้นำกลับไปปรับปรุงแก้ไข / ให้นำกลับไปทบทวน / แต่งตั้ง.............................................................................
+
+				(กรณีมีมติเดียว ระบุมติพร้อมข้อความของมติให้ชัดเจน
+
+				กรณีที่มีหลายมติ ให้ระบุมติเป็นข้อ ๆ พร้อมข้อความของมติให้ชัดเจน เช่น
+1.	อนุมัติ.....................................................................................................
+2.	มอบหมายให้....................................................................ดำเนินการ.................................)
+
+				กรณีที่ประชุมให้รับรองรายงานการประชุมในการประชุมครั้งนี้ ให้ใช้ข้อความต่อท้ายมติ ดังนี้
+				"ที่ประชุมรับรองมติที่ประชุมครั้งนี้ โดยไม่ต้องรอรับรองรายงานการประชุมครั้งถัดไป"
+
+ระเบียบวาระที่ ๖	เรื่องอื่น ๆ
+
+	(โดยปกติเป็นเรื่องที่กรรมการมีข้อคิดเห็นเพิ่มเติมนอกเหนือจากระเบียบวาระที่กำหนดไว้  หรือเสนอให้มีการพิจารณาเรื่องใดเรื่องหนึ่งเพิ่มเติม  หรือเป็นการแจ้งกำหนดการประชุมครั้งต่อไป)
+
+	๖.๑	ประธานแจ้งกำหนดการประชุม.................................... ครั้งที่....../.......... ในวันที่...............เวลา.................น. ณ ห้องประชุม..........................อาคาร.....................................หน่วยงาน............................................
+
+	เมื่อไม่มีกรรมการท่านใดเสนอเรื่องใด ๆ แล้ว ประธานได้กล่าวขอบคุณแล้วปิดการประชุม
+
+เลิกประชุมเวลา...............................น.
+   
+
+(..........................................)	(..........................................)
+  ผู้จดรายงานการประชุม			ผู้ตรวจรายงานการประชุม
+
+โปรดจัดทำรายงานตามโครงสร้างข้างต้นจากโน้ตดิบด้านล่างนี้ โดยรักษาถ้อยคำทางราชการ และหากข้อมูลใดไม่มีให้พิมพ์คำว่า เอ็นเอ
+
+โน้ตดิบ:
+${notes}`;
+  }
+
+  // English fallback keeps existing behavior
+  const th = false; // not used below, keep original mapping logic
+  const head = 'Create meeting minutes ready to copy';
+  const langLine = 'Language English';
+  let tone
+  if (style === 'short') {
+    tone = 'Short crisp sentences'
+  } else if (style === 'long') {
+    tone = 'Detailed longer paragraphs, 3 to 6 lines per sub item, include dates times and N A when missing'
+  } else {
+    tone = 'Standard formal tone'
+  }
+  const styleLine = tone
+  const forbid = 'No em dash and no emoji'
+  const label = 'Sections in order'
+  const bullets = sections.map(s => `- ${s}`).join('\n')
+  const hint = 'For action items include owner due date initial status'
+  const missing = 'If missing write N A'
+  return `${head}\n${langLine}\n${styleLine}\n${forbid}\n${label}\n${bullets}\n${hint}\n${missing}\nFrom the following raw notes\n\n${notes}`
+}
+
+async function callWorker(payload) {
+  const res = await fetch(ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  if (!res.ok) throw new Error('Worker error')
+  const ct = res.headers.get('content-type') || ''
+  if (ct.includes('application/json')) {
+    const data = await res.json()
+    // รองรับหลายรูปแบบผลลัพธ์จาก worker ต่างกัน รวม Gemma-style
+    if (data.output) return data.output
+    if (data.text) return data.text
+    if (data.result) return data.result
+    if (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) return data.choices[0].message.content
+    if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+      return data.candidates[0].content.parts.map(p => p.text).join('\n');
+    }
+    return JSON.stringify(data)
+  } else {
+    return await res.text()
+  }
+}
+
+async function generate() {
+  const notes = $('notes').value.trim()
+  if (!notes) { $('output').value = 'กรุณาวางโน้ตการประชุมก่อน' ; return }
+
+  const lang = $('lang').value
+  const sections = sectionsEl()
+  const style = $('style').value
+  const format = $('format').value
+
+  $('gen').disabled = true
+  $('gen').textContent = 'กำลังสร้าง'
+
+  // Hide error and moderation status first
+  moderationStatus.classList.add('hidden');
+  // Show moderation/environmental status box as in step-by-step.html
+  showModeration(
+    "No English moderation required",
+    true,
+    estimateWaterForPrompt(notes),
+    estimateEnergyForPrompt(notes),
+    computePercentSaved(estimateEnergyForPrompt(notes), BASELINE_COMPARISON_WH)
+  );
+
+  try {
+    const userPrompt = buildPrompt(lang, sections, style, notes)
+
+    // Compose contents array with ONLY the user prompt, no hidden instructions
+    const contents = [{
+      role: 'user',
+      parts: [{ text: userPrompt }]
+    }];
+
+    const payload = { contents };
+
+    const raw = await callWorker(payload)
+    $('output').value = sanitize(raw)
+  } catch (e) {
+    $('output').value = 'เกิดข้อผิดพลาดในการสร้างรายงาน'
+  } finally {
+    $('gen').disabled = false
+    $('gen').textContent = 'สร้างรายงาน'
+  }
+}
+
+$('gen').addEventListener('click', generate)
+
+$('copyBtn').addEventListener('click', async () => {
+  const t = $('output').value
+  if (!t) return
+  await navigator.clipboard.writeText(t)
+})
+
+$('downloadBtn').addEventListener('click', () => {
+  const blob = new Blob([$('output').value], { type: 'text/plain;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'meeting-minutes.txt'
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
+})
+
+// Update environmental stats dynamically as user types
+const problemInput = $('notes');
+if (problemInput) {
+  problemInput.addEventListener('input', updateEnvironmentStats);
+}
+window.addEventListener('load', updateEnvironmentStats);
+</script>
+</body>
+</html>

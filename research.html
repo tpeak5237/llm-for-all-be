@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Research for all</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&amp;family=Taviraj:wght@300;400;500;600&amp;family=Kanit:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    .lock-screen{ position: fixed; inset: 0; z-index: 5000; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+    body.locked { overflow: hidden; }
+    :root{
+      --brown:#8B5E3C;
+      --gold:#D4AF37;
+      --bg1:#f8f7f4;
+      --bg2:#eceff1;
+    }
+    .text-woody{ color: var(--brown) !important; }
+    .border-woody{ border-color: var(--brown) !important; }
+    .bg-woody{ background-color: var(--brown) !important; color: #fff !important; }
+    .hover-bg-gold:hover{ background-color: var(--gold) !important; color:#1a1a1a !important; }
+    .heading-display{ font-family: 'Playfair Display', serif; letter-spacing: -0.01em; }
+    .body-serif{ font-family: 'Taviraj', 'Kanit', sans-serif; }
+    .btn-primary{ background-color: var(--brown) !important; color:#fff !important; border-radius:9999px; padding:0.5rem 1.5rem; font-weight:600; transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease; box-shadow: 0 6px 16px rgba(139,94,60,0.18); }
+    .btn-primary:hover{ background-color: var(--gold) !important; color:#1a1a1a !important; transform: translateY(-1px) scale(1.02); box-shadow: 0 10px 22px rgba(139,94,60,0.22); }
+    .btn-primary:disabled{ opacity:.6; cursor:not-allowed; }
+    ::selection{ background: var(--brown); color:#fff; }
+    body { font-family: 'Taviraj','Kanit',sans-serif; background: linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 100%); min-height:100vh; background-image:url('https://www.transparenttextures.com/patterns/cubes.png'); }
+    .main-card { background: rgba(255,255,255,0.92); max-width: 72rem; margin-left:auto; margin-right:auto; box-shadow: 0 6px 32px rgba(31,41,55,0.12), 0 1.5px 6px rgba(139,94,60,0.12); border-radius: 1.5rem; border: 2.5px solid var(--brown); padding: 2rem; transition: box-shadow .2s, transform .15s; }
+    .main-card:hover { box-shadow: 0 20px 60px rgba(31,41,55,0.18), 0 6px 18px rgba(139,94,60,0.16); transform: scale(1.01); }
+    .prompt-frame { transition: box-shadow 0.3s, border-color 0.3s, transform 0.5s cubic-bezier(.4,2,.6,1); box-shadow: 0 4px 24px 0 rgba(139,94,60,0.10); border: 2.5px solid var(--brown); border-radius: 1.25rem; background: linear-gradient(90deg,#fff 80%,#f3f4f6 100%); position: sticky; top: 20px; }
+    #queryInput { overflow-y: auto; resize: none; min-height: 3.5rem; max-height: 6rem; }
+    @media (max-width: 600px){ .prompt-frame{ position: static; top: auto; width: 100%; } }
+    #results { flex-grow: 1; padding-bottom: 1.5rem; min-height: 200px; max-height: none; }
+    .paper-card{ background: linear-gradient(90deg,#ffffff 80%,#f3f4f6 100%); border: 1.5px solid rgba(139,94,60,0.25); border-radius: .9rem; box-shadow: 0 1.5px 6px rgba(139,94,60,0.06); padding: 1rem; }
+    .paper-card:hover{ box-shadow: 0 6px 20px rgba(139,94,60,0.15); transform: translateY(-1px); transition: transform .2s ease, box-shadow .2s ease; }
+    #searchButton.is-busy { background-color: var(--brown) !important; cursor: not-allowed; opacity: .6; }
+    #searchButton.is-busy:hover { background-color: var(--brown) !important; }
+    .nav-card { background:#f5f5f7; color:#1d1d1f; padding:2.5rem; text-decoration:none; font-size:1.5rem; font-weight:500; border-radius:20px; transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease, color .2s ease; box-shadow:0 10px 20px rgba(0,0,0,0.05); display:flex; align-items:center; justify-content:center; text-align:center; border:1px solid rgba(139,94,60,0.2); }
+    .nav-card:hover { transform: translateY(-6px) scale(1.01); box-shadow: 0 15px 30px rgba(0,0,0,0.12); background-color: var(--brown); color:#fff; border-color: var(--brown); }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800 min-h-screen flex items-center justify-center flex-col p-4 body-serif">
+
+  <div class="main-card p-0 md:p-0 w-full max-w-5xl flex space-x-0 md:space-x-6 border-0 md:border-2 border-gray-300">
+    <div class="flex-grow w-2/3 flex flex-col px-2 md:px-8 py-6">
+      <main class="flex-grow flex flex-col">
+        <div class="flex justify-center px-4">
+          <div id="promptFrame" class="flex flex-col items-center w-full max-w-full md:max-w-2xl mb-4 mx-auto border-woody">
+            <h1 class="text-6xl font-semibold tracking-tight heading-display text-woody">Research for all</h1>
+            <p class="text-xl text-gray-600 text-center -mt-2 mb-4 pt-5">วิจัย 39 ล้านฉบับ หาได้ในหลักนาที (เฉพาะภาษาอังกฤษ)</p>
+            <div class="flex w-full items-center space-x-3 border border-woody rounded-full px-4 py-3 bg-gray-50">
+              <textarea id="queryInput" rows="1" placeholder="" class="flex-grow bg-transparent text-gray-800 placeholder-gray-400 focus:outline-none resize-none overflow-y-auto min-h-[3.5rem] max-h-[6rem] text-base md:text-lg leading-normal px-2"></textarea>
+              <button id="searchButton" class="btn-primary rounded-full h-12 shadow-md shrink-0">Search</button>
+            </div>
+            <div class="w-full grid grid-cols-2 gap-3 mt-3">
+              <div class="flex items-center gap-2">
+                <label for="maxResults" class="text-sm text-gray-600">Max</label>
+                <input id="maxResults" type="number" min="1" max="100" value="20" class="w-20 border rounded px-2 py-1">
+              </div>
+              <div class="flex items-center gap-2">
+                <label for="sortBy" class="text-sm text-gray-600">Sort</label>
+                <select id="sortBy" class="border rounded px-2 py-1 w-full">
+                  <option value="relevance">relevance</option>
+                  <option value="lastUpdatedDate">last updated</option>
+                  <option value="submittedDate">submitted date</option>
+                </select>
+              </div>
+              <div class="flex items-center gap-2">
+                <label for="startYear" class="text-sm text-gray-600">From year</label>
+                <input id="startYear" type="number" min="1991" value="2018" class="w-28 border rounded px-2 py-1">
+              </div>
+              <div class="flex items-center gap-2">
+                <label for="endYear" class="text-sm text-gray-600">To year</label>
+                <input id="endYear" type="number" min="1991" value="2025" class="w-28 border rounded px-2 py-1">
+              </div>
+            </div>
+            <div id="aiNearestRow" class="w-full mt-3 flex items-center gap-3">
+              <label class="text-sm text-gray-700 flex items-center gap-2">
+                <input id="autoRerankToggle" type="checkbox" class="h-4 w-4">
+                Re-rank with AI after search
+              </label>
+              <span id="rerankStatus" class="text-xs text-gray-500"></span>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-xs text-gray-500 text-center -mt-2 mb-4">โปรดตรวจสอบข้อมูลก่อนนำไปใช้อ้างอิง</p>
+
+        <div id="statusMsg" class="mt-2 p-2 rounded text-sm hidden"></div>
+
+        <div id="results" class="mt-4 flex flex-col gap-4 max-w-3xl mx-auto"></div>
+
+        <div class="flex justify-center mt-6">
+          <button id="loadMoreBtn" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-full px-6 h-12 shadow-sm font-semibold">Load more</button>
+        </div>
+      </main>
+      <footer class="mt-auto pt-6 text-center">
+        <p class="text-xs text-gray-500">&nbsp;</p>
+      </footer>
+    </div>
+  </div>
+
+  <div class="py-8"></div>
+
+  <main>
+    <center>
+      <h2 class="text-3xl font-bold text-woody mb-6 text-center heading-display">Directory</h2>
+      <a href="index.html" class="nav-card">LLM for all</a>
+    </center>
+  </main>
+  <footer class="w-full mt-12 py-8 bg-white border-t border-black text-center" style="font-family: 'Taviraj', serif;">
+    <div class="max-w-3xl mx-auto px-4">
+      <div class="text-lg font-semibold text-woody mb-2"><b>ปัญญาประดิษฐ์เพื่อการเป็นมิตรต่อสิ่งแวดล้อมและอยู่ในจริยธรรมทางปัญญาประดิษฐ์ที่ถูกต้อง</b></div>
+      <div class="text-base text-gray-700 mb-2">ระดับชั้น ม.3/5</div>
+      <div class="mt-4 text-sm text-gray-700 text-left inline-block mx-auto" style="white-space: pre-line;">
+        1) เด็กชาย นิธิศ โพธิ์ลีลาธรรม เลขที่ 6
+        2) เด็กชาย ติณณ์ศดิศ บัณฑิตเอกตระกูล เลขที่ 13
+        3) เด็กชาย ธีรภัทรส์ พงษ์เกษม เลขที่ 14
+        4) เด็กชาย พัสกร บุญบูรพงษ์ เลขที่ 17
+        5) เด็กชาย แทนคุณ เซี่ยงฉิน เลขที่ 21
+        6) เด็กชาย ธนกฤต บุญรักษาตระกูล เลขที่ 26
+        7) เด็กชาย กรวิชญ์ เพียรผลดีสกุล เลขที่ 27
+        8) เด็กชาย ศุภรุจ ศรีหะรัญ เลขที่ 39
+      </div>
+      <div class="mt-6">
+        <b class="text-[#8B5E3C] text-xl">โครงงาน AC Innovation ม.3</b> <br>
+        <b class="text-[#8B5E3C] text-xl">Since 29 May 2025</b>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const queryInput = document.getElementById('queryInput');
+    const searchButton = document.getElementById('searchButton');
+    const resultsEl = document.getElementById('results');
+    const statusMsg = document.getElementById('statusMsg');
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+
+    const sortByEl = document.getElementById('sortBy');
+    const maxResultsEl = document.getElementById('maxResults');
+    const startYearEl = document.getElementById('startYear');
+    const endYearEl = document.getElementById('endYear');
+
+    // === Gemma setup ===
+    let modelApiName = 'gemma-3-27b-it'
+    const defaultApiKeyObf = 'AIzaSy Ai7g9ktQXUYoj0F9j_cgTpQQhIM1CVcHQ'
+    const apiKeyInput = document.getElementById('apiKeyInput')
+    const saveKeyBtn = document.getElementById('saveKeyBtn')
+    const keyStatus = document.getElementById('keyStatus')
+
+    function getApiKey(){
+      const k = localStorage.getItem('geminiKey') || defaultApiKeyObf
+      return k.replace(/\s+/g,'')
+    }
+    function setApiKey(k){
+      try{ localStorage.setItem('geminiKey', k) }catch(e){}
+    }
+
+
+    async function callGemma(prompt){
+      const url = 'https://llm-for-all-be.onrender.com/call-ai';
+      const body = { contents: [{ role: 'user', parts: [{ text: prompt }]}] };
+      const r = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if(!r.ok){
+        let msg = 'API error';
+        try{ const j = await r.json(); msg = j.error && j.error.message ? j.error.message : msg }catch(e){}
+        throw new Error(msg);
+      }
+      const j = await r.json();
+      const text = j && j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts && j.candidates[0].content.parts[0] && j.candidates[0].content.parts[0].text ? j.candidates[0].content.parts[0].text : '';
+      return text || 'No summary';
+    }
+
+    let currentStart = 0;
+    let lastQuery = '';
+    const itemBySlug = new Map()
+    function slugFromId(id){ return (id||'').split('/').pop().replace(/[^A-Za-z0-9_-]/g,'_') }
+
+
+    const autoRerankToggle = document.getElementById('autoRerankToggle')
+    const rerankStatus = document.getElementById('rerankStatus')
+
+    let currentItems = []
+
+    // === Environmental footprint (Gemma 27B) ===
+    function estimateWater(chars) {
+      const BASE_PROMPT_CHARS = 1000;
+      const BASE_PROMPT_WATER_ML = 0.045; // Gemma 27B ~0.045 mL per 1000 chars
+      const ml = (chars / BASE_PROMPT_CHARS) * BASE_PROMPT_WATER_ML;
+      return Math.max(0.0005, ml);
+    }
+
+    function estimateEnergy(chars) {
+      const BASE_PROMPT_CHARS = 1000;
+      const BASE_PROMPT_ENERGY_WH = 0.045; // Gemma 27B ~0.045 Wh per 1000 chars
+      const wh = (chars / BASE_PROMPT_CHARS) * BASE_PROMPT_ENERGY_WH;
+      return Math.max(0.0001, wh);
+    }
+
+
+    function setBusy(b){
+      if(b){ searchButton.classList.add('is-busy'); searchButton.disabled = true; searchButton.textContent = 'Searching...'; }
+      else { searchButton.classList.remove('is-busy'); searchButton.disabled = false; searchButton.textContent = 'Search'; }
+    }
+
+    function showStatus(text, ok=true){
+      statusMsg.textContent = text;
+      statusMsg.className = 'mt-2 p-2 rounded text-sm ' + (ok ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-red-100 text-red-800 border border-red-300');
+      statusMsg.classList.remove('hidden');
+      if(ok){ setTimeout(()=> statusMsg.classList.add('hidden'), 4000); }
+    }
+
+    function autoGrow(){
+      if(!queryInput) return;
+      const minPx = 56;
+      const maxPx = window.innerWidth < 640 ? 180 : 352;
+      queryInput.style.height = 'auto';
+      let newH = Math.max(minPx, Math.min(queryInput.scrollHeight, maxPx));
+      queryInput.style.height = newH + 'px';
+      if(!queryInput.value.includes('\n') && queryInput.value.length <= 60 && newH <= minPx + 4){ queryInput.style.lineHeight = (minPx - 10) + 'px'; } else { queryInput.style.lineHeight = '1.6'; }
+    }
+    queryInput.addEventListener('input', ()=>{ autoGrow() })
+
+    function buildQuery(raw){
+      // Pass through advanced tokens like title:, author:, cat:
+      // If none provided, search all fields
+      if(/(title:|author:|cat:)/.test(raw)) return encodeURIComponent(raw.trim());
+      return encodeURIComponent('all:"' + raw.trim() + '"');
+    }
+
+    async function fetchWithFallback(url){
+      // Direct first
+      try{
+        const r = await fetch(url);
+        if(r.ok){ return await r.text(); }
+      }catch(e){ /* fall through */ }
+      // AllOrigins
+      try{
+        const r = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(url));
+        if(r.ok){ return await r.text(); }
+      }catch(e){ }
+      // Jina reader
+      try{
+        const r = await fetch('https://r.jina.ai/http://' + url.replace(/^https?:\/\//,'').replace(/^\/\//,''));
+        if(r.ok){ return await r.text(); }
+      }catch(e){ }
+      // isomorphic-git CORS proxy
+      try{
+        const r = await fetch('https://cors.isomorphic-git.org/' + url);
+        if(r.ok){ return await r.text(); }
+      }catch(e){ }
+      throw new Error('Network blocked by CORS');
+    }
+
+    function parseArxiv(xmlText){
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(xmlText, 'application/xml');
+      const entries = Array.from(doc.getElementsByTagName('entry'));
+      return entries.map(e => {
+        const get = tag => e.getElementsByTagName(tag)[0]?.textContent || '';
+        const id = get('id');
+        const title = get('title').replace(/\s+/g,' ').trim();
+        const summary = get('summary').replace(/\s+/g,' ').trim();
+        const published = get('published');
+        const updated = get('updated');
+        const authorEls = Array.from(e.getElementsByTagName('author'));
+        const authors = authorEls.map(a => a.getElementsByTagName('name')[0]?.textContent || '').filter(Boolean);
+        let pdf = '';
+        let abs = '';
+        const linkEls = Array.from(e.getElementsByTagName('link'));
+        linkEls.forEach(l => {
+          const rel = l.getAttribute('rel');
+          const type = l.getAttribute('type');
+          const href = l.getAttribute('href');
+          if(type === 'application/pdf'){ pdf = href; }
+          if(rel === 'alternate'){ abs = href; }
+        });
+        const primaryCatEl = e.getElementsByTagName('arxiv:primary_category')[0] || e.getElementsByTagName('primary_category')[0];
+        const primaryCategory = primaryCatEl ? (primaryCatEl.getAttribute('term') || '') : '';
+        return { id, title, summary, authors, published, updated, pdf, abs, primaryCategory };
+      });
+    }
+
+    function withinYearRange(dateStr, y1, y2){
+      if(!dateStr) return true;
+      const y = new Date(dateStr).getFullYear();
+      if(Number.isNaN(y)) return true;
+      return y >= y1 && y <= y2;
+    }
+
+    function renderPapers(items, append=false){
+      if(!append) resultsEl.innerHTML = '';
+      if(items.length === 0 && !append){
+        resultsEl.innerHTML = '<div class="text-center text-gray-500">No results.</div>';
+        return;
+      }
+      for(const p of items){
+        const card = document.createElement('div');
+        card.className = 'paper-card';
+        card.innerHTML = `
+          <div class="flex flex-col gap-1">
+            <div class="text-xl font-semibold text-woody">${escapeHtml(p.title)} <span class="ml-2 text-xs text-gray-600" data-ai-score-for="${slugFromId(p.id)}"></span></div>
+            <div class="text-sm text-gray-700">${escapeHtml(p.authors.join(', '))}</div>
+            <div class="text-xs text-gray-500">${p.primaryCategory ? 'Category: ' + escapeHtml(p.primaryCategory) + ' · ' : ''}Published: ${p.published ? new Date(p.published).toLocaleDateString() : ''}</div>
+            <div class="text-sm text-gray-800 mt-1">${escapeHtml(p.summary)}</div>
+            <div class="mt-2 flex flex-wrap gap-2">
+              ${p.abs ? `<a class="btn-primary text-sm" href="${p.abs}" target="_blank" rel="noopener">Abstract</a>` : ''}
+              ${p.pdf ? `<a class="btn-primary text-sm" href="${p.pdf}" target="_blank" rel="noopener">PDF</a>` : ''}
+              <button class="btn-primary text-sm" data-copy="${encodeURIComponent(formatQuickCite(p))}">Copy cite</button>
+              <button class="btn-primary text-sm" data-summarize="${slugFromId(p.id)}">AI summary</button>
+              <button class="btn-primary text-sm" data-copy-summary="${slugFromId(p.id)}">Copy summary</button>
+            </div>
+            <div id="sum-${slugFromId(p.id)}" class="mt-2 text-sm text-gray-800 hidden"></div>
+          </div>`;
+        resultsEl.appendChild(card);
+      }
+      // wire copy buttons
+      resultsEl.querySelectorAll('button[data-copy]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const text = decodeURIComponent(btn.getAttribute('data-copy'));
+          navigator.clipboard.writeText(text).then(()=>{
+            btn.textContent = 'Copied';
+            setTimeout(()=> btn.textContent = 'Copy cite', 1200);
+          });
+        });
+      });
+    }
+
+    function escapeHtml(s){
+      return s.replace(/[&<>\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
+    }
+
+    function formatQuickCite(p){
+      const y = p.published ? new Date(p.published).getFullYear() : '';
+      const authors = p.authors.join(', ');
+      return `${authors} (${y}). ${p.title}. arXiv:${p.id.split('/').pop()}`;
+    }
+
+    async function rerankWithAI(seed, items){
+      const slim = items.slice(0, 20).map(it => ({ id: slugFromId(it.id), title: it.title, summary: it.summary }))
+      const prompt = [
+        'Score relevance for the following papers against the user request. Output one line per paper as id|score|why.',
+        'Score is 0 to 100. Return only the top 10 lines. Keep why under 12 words.',
+        'Request:', seed,
+        'Papers:',
+        ...slim.map(it => `${it.id}\t${it.title}\t${it.summary.substring(0,400)}`)
+      ].join('\n')
+      let text = await callGemma(prompt)
+      text = text.replace(/[—–]/g,'-')
+      const rows = text.split(/\n+/).map(s => s.trim()).filter(Boolean)
+      const scores = new Map()
+      for(const row of rows){
+        const m = row.match(/^([^|]+)\|\s*(\d{1,3})\s*\|/)
+        if(m){ scores.set(m[1].trim(), Math.min(100, parseInt(m[2],10))) }
+      }
+      return scores
+    }
+
+    function applyScoresAndMaybeResort(scores){
+      if(!scores || scores.size === 0) return
+      // annotate badges
+      scores.forEach((sc, id) => {
+        const badge = document.querySelector(`[data-ai-score-for="${id}"]`)
+        if(badge){ badge.textContent = `(AI ${sc})` }
+      })
+      // resort by score if present
+      const withScore = currentItems.map(it => ({ it, id: slugFromId(it.id), sc: scores.get(slugFromId(it.id)) || -1 }))
+      withScore.sort((a,b) => b.sc - a.sc)
+      currentItems = withScore.map(x => x.it)
+      renderPapers(currentItems, false)
+      // re-apply badges after re-render
+      scores.forEach((sc, id) => {
+        const badge = document.querySelector(`[data-ai-score-for="${id}"]`)
+        if(badge){ badge.textContent = `(AI ${sc})` }
+      })
+    }
+
+    async function search(start=0, append=false){
+      const raw = queryInput.value.trim();
+      if(!raw){ showStatus('Enter a query', false); return; }
+      const max = Math.min(Math.max(parseInt(maxResultsEl.value||'20',10),1),100);
+      const sortBy = sortByEl.value;
+      const q = buildQuery(raw);
+      const url = `https://export.arxiv.org/api/query?search_query=${q}&start=${start}&max_results=${max}&sortBy=${encodeURIComponent(sortBy)}`;
+      setBusy(true);
+      try{
+        const xml = await fetchWithFallback(url);
+        const items = parseArxiv(xml);
+        // Store for summarization
+        itemBySlug.clear()
+        items.forEach(it => { itemBySlug.set(slugFromId(it.id), it) })
+        const y1 = parseInt(startYearEl.value||'1991',10);
+        const y2 = parseInt(endYearEl.value||'2100',10);
+        const filtered = items.filter(it => withinYearRange(it.published, y1, y2));
+        currentItems = filtered
+        renderPapers(filtered, append);
+        loadMoreBtn.classList.remove('hidden');
+        currentStart = start + max;
+        lastQuery = raw;
+        showStatus(`Loaded ${filtered.length} papers`);
+        if(!append && autoRerankToggle && autoRerankToggle.checked){
+          rerankStatus.textContent = 'AI re-ranking'
+          try{
+            const scores = await rerankWithAI(queryInput.value.trim(), currentItems)
+            applyScoresAndMaybeResort(scores)
+            rerankStatus.textContent = 'AI re-ranked'
+          }catch(e){
+            rerankStatus.textContent = 'AI re-rank failed'
+          }
+        }
+      } catch(err){
+        console.error(err);
+        showStatus('Fetch failed. Try different terms', false);
+      } finally{ setBusy(false); }
+    }
+
+    searchButton.addEventListener('click', () => { currentStart = 0; search(0, false); });
+    loadMoreBtn.addEventListener('click', () => { search(currentStart, true); });
+    queryInput.addEventListener('keydown', e => { if(e.shiftKey && e.key === 'Enter'){ e.preventDefault(); search(0,false); } });
+
+    // Delegated handlers for AI summary and copy summary
+    resultsEl.addEventListener('click', async e => {
+      const btn = e.target
+      if(btn.matches('button[data-summarize]')){
+        const slug = btn.getAttribute('data-summarize')
+        const target = document.getElementById('sum-' + slug)
+        if(!target) return
+        const item = itemBySlug.get(slug)
+        if(!item){ showStatus('Item not found', false); return }
+        try{
+          btn.textContent = 'Summarizing...'
+          btn.disabled = true
+          target.classList.remove('hidden')
+          target.textContent = 'Thinking'
+          const abstract = item.summary || ''
+          const title = item.title || ''
+          const prompt = `Summarize this arXiv abstract in three short lines. One line for the problem. One for the method. One for a key result. Use plain text. No emojis.\n\nTitle: ${title}\nAbstract: ${abstract}`
+          let text = await callGemma(prompt)
+          // sanitize em dashes and markdown
+          text = text.replace(/[—–]/g,'-').replace(/\*\*?|__/g,'')
+          target.textContent = text
+        }catch(err){
+          target.textContent = 'Summary failed: ' + err.message
+        }finally{
+          btn.textContent = 'AI summary'
+          btn.disabled = false
+        }
+      }
+      if(btn.matches('button[data-copy-summary]')){
+        const slug = btn.getAttribute('data-copy-summary')
+        const target = document.getElementById('sum-' + slug)
+        if(!target || target.classList.contains('hidden') || !target.textContent.trim()){
+          showStatus('No summary to copy', false)
+          return
+        }
+        navigator.clipboard.writeText(target.textContent).then(()=>{
+          btn.textContent = 'Copied'
+          setTimeout(()=> btn.textContent = 'Copy summary', 1200)
+        })
+      }
+    })
+
+
+    
+  </script>
+</body>
+</html>
