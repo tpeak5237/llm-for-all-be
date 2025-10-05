@@ -6,7 +6,6 @@ app.use(express.json({ limit: "20mb" }));
 
 // Allowed frontend origins
 const allowedOrigins = ["https://llmforall.netlify.app", "null"];
-
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) res.header("Access-Control-Allow-Origin", origin);
@@ -16,19 +15,19 @@ app.use((req, res, next) => {
   next();
 });
 
+// Health check endpoint
 app.get("/", (req, res) => {
   res.status(200).send("✅ LLM-for-All backend running on Render");
 });
 
+// AI proxy endpoint
 app.post("/call-ai", async (req, res) => {
   try {
     const { model = "gemma-3-27b-it", payload, prompt } = req.body;
-
-    // Fallback for empty payloads
+    // If payload missing, wrap prompt in expected payload format
     let finalPayload = payload;
     if (!finalPayload || !finalPayload.contents || finalPayload.contents.length === 0) {
-      const textPrompt =
-        prompt || "Please provide a prompt or question.";
+      const textPrompt = prompt || "Please provide a prompt or question.";
       finalPayload = {
         contents: [
           {
@@ -38,16 +37,13 @@ app.post("/call-ai", async (req, res) => {
         ],
       };
     }
-
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.API_KEY}`;
     console.log("➡️ Sending to Google API:", apiUrl);
-
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(finalPayload),
     });
-
     const text = await response.text();
     res.status(response.status).type("application/json").send(text);
   } catch (error) {
