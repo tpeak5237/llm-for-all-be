@@ -5,7 +5,7 @@ const app = express();
 app.use(express.json({ limit: "20mb" }));
 
 // Allowed frontend origins
-const allowedOrigins = ["https://llmforall.netlify.app", "null"]; // include null for local file:// testing
+const allowedOrigins = ["https://llmforall.netlify.app", "null"]; // include "null" for local file:// testing
 
 // CORS middleware
 app.use((req, res, next) => {
@@ -24,23 +24,28 @@ app.get("/", (req, res) => {
   res.status(200).send("✅ LLM-for-All backend running on Render");
 });
 
-// Main AI route
+// Main AI route (used by all programs)
 app.post("/call-ai", async (req, res) => {
   try {
-    const { model = "gemma-3-27b-it", payload, prompt } = req.body;
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.API_KEY}`;
+    const { model = "gemma-2-9b-it", payload, prompt } = req.body;
 
-    // If frontend sends only 'prompt', wrap it as a payload
-    const finalPayload =
-      payload ||
-      {
+    // Fallback: if frontend only sends plain text
+    let finalPayload = payload;
+    if (!finalPayload) {
+      const textPrompt =
+        prompt || (typeof req.body === "string" ? req.body : "No prompt received.");
+      finalPayload = {
         contents: [
           {
             role: "user",
-            parts: [{ text: prompt || "No prompt received." }],
+            parts: [{ text: textPrompt }],
           },
         ],
       };
+    }
+
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.API_KEY}`;
+    console.log("➡️ Sending to Google API:", apiUrl);
 
     const response = await fetch(apiUrl, {
       method: "POST",
@@ -51,6 +56,7 @@ app.post("/call-ai", async (req, res) => {
     const text = await response.text();
     res.status(response.status).type("application/json").send(text);
   } catch (error) {
+    console.error("❌ Backend error:", error);
     res
       .status(500)
       .json({ error: "AI request failed", detail: error.message });
@@ -58,5 +64,5 @@ app.post("/call-ai", async (req, res) => {
 });
 
 // Start server
-const PORT = process.env.PORT || 10000; // Render automatically maps 10000 to public HTTPS
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const PORT = process.env.PORT || 10000; // Render auto-assigns 10000 to HTTPS
+app.listen(PORT, () => console.log(`✅ LLM-for-All backend running on port ${PORT}`));
