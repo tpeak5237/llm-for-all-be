@@ -27,7 +27,7 @@ app.get("/", (req, res) => {
 // Main AI route (used by all programs)
 app.post("/call-ai", async (req, res) => {
   try {
-    const { model = "gemma-3n-27b-it", payload, prompt } = req.body;
+    const { model = "gemma-3-27b-it", payload, prompt } = req.body;
 
     // Fallback: if frontend only sends plain text
     let finalPayload = payload;
