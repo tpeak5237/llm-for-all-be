@@ -25,7 +25,7 @@ app.get("/", (req, res) => {
 // Unified AI endpoint
 app.post("/call-ai", async (req, res) => {
   try {
-    const model = req.body.model || "gemma-3-27b-it";
+    const model = req.body.model || "gemma-3n-e4b-it";
     let payload = req.body;
 
     // Gemma models don't support system_instruction
