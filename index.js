@@ -18,8 +18,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// File path for usage log
-const LOG_PATH = "./usage_log.json";
+// File path for usage log (safe for Render)
+const LOG_PATH = "/tmp/usage_log.json";
 
 // Initialize log file if missing
 if (!fs.existsSync(LOG_PATH)) {
@@ -63,6 +63,16 @@ app.get("/", (req, res) => {
   res.status(200).send("✅ LLM-for-All backend running on Render");
 });
 
+// Usage stats endpoint
+app.get("/stats", (req, res) => {
+  try {
+    const data = JSON.parse(fs.readFileSync(LOG_PATH));
+    res.status(200).json(data);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to read usage log", detail: err.message });
+  }
+});
+
 // Unified AI endpoint
 app.post("/call-ai", async (req, res) => {
   try {
@@ -89,9 +99,9 @@ app.post("/call-ai", async (req, res) => {
 
     const text = await response.text();
 
-    // Try to estimate token usage (roughly by text length)
-    const tokensUsed = JSON.stringify(payload).length / 4;
-    updateUsage(model, Math.round(tokensUsed));
+    // Estimate token usage by payload length
+    const tokensUsed = Math.round(JSON.stringify(payload).length / 4);
+    updateUsage(model, tokensUsed);
 
     res.status(response.status).type("application/json").send(text);
   } catch (error) {
@@ -100,4 +110,7 @@ app.post("/call-ai", async (req, res) => {
   }
 });
 
-const PORT = process.env
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () =>
+  console.log(`✅ LLM-for-All backend running on port ${PORT}`)
+);
