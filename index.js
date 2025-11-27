@@ -47,7 +47,9 @@ app.post("/call-ai", async (req, res) => {
     });
 
     const text = await response.text();
-    res.status(response.status).type("application/json").send(text);
+console.log("⬅️ Gemini status:", response.status);
+console.log("⬅️ Gemini body:", text);
+res.status(response.status).type("application/json").send(text);
   } catch (error) {
     console.error("❌ Backend error:", error);
     res.status(500).json({ error: "AI request failed", detail: error.message });
