@@ -30,7 +30,7 @@ app.post("/call-ai", async (req, res) => {
   try {
     // Detect where the request is coming from
     const origin = req.headers.origin || "";
-    const model = req.body.model || "gemini-1.5-flash";
+    const model = req.body.model || "gemma-e4b-27b-it";
     let payload = req.body;
 
     console.log(`📨 Request from: ${origin || "Unknown/Local"}`);
